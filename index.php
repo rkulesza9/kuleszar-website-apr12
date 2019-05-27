@@ -49,6 +49,22 @@
       $chosen_poem = "https://docs.google.com/document/d/e/2PACX-1vSpR4HlHeNDlR8Bu_X4EWmhmJH1NtbHRahvPyVnLMm9VfyGATh1yPFJYAnNzfkdGdnH_a6Q7EFAAzPI/pub?embedded=true";
     }
 
+    //schedule
+    //schedule table ('id', 'u_id', 'activity', 'start', 'end')
+    $id = $_SESSION['user_id'];
+    $sql = "select id, activity, weekday, start, end from schedule where u_id=?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i",$id);
+    $stmt->bind_result($id, $activity, $weekday, $start, $end);
+    $stmt->execute();
+
+    $schedule = "";
+    while($stmt->fetch()){
+      $schedule = "<tr id='black'><input type='hidden' value='$id' name='id[]'>$weekday</td><td id='black'><input type='text' value='$activity' name='activity[]'>'</td><td id='black'><input type='time' value='$start' name='start[]'></td><td id='black'><input type='time' value='$end' name='end[]'></td><td><input type='checkbox' name='delete[]'> Delete</tr>";
+    }
+
+    $stmt->close();
+
   } else {
     header("Location: login.php");
   }
@@ -92,6 +108,12 @@
         text-decoration:none;
         border: 1px solid white;
         padding:1px;
+        border-collapse: collapse;
+      }
+      #black {
+        color:black;
+        border: 1px solid black;
+        border-collapse: collapse;
       }
       .hbody {
         display: block;
@@ -109,6 +131,7 @@
         text-align: center;
         padding-top: 50px;
       }
+
     </style>
   </head>
   <body>
@@ -152,8 +175,8 @@ HTML;
     <div class='subheader' id='poetry'>
       <h2>Poetry</h2>
     </div>
-    <div class='hbody' style='text-align:center;height:200px;'>
-      <iframe style='display:inline-block;width:50%;height:95%;' src='<?php echo $chosen_poem ?>'></iframe>
+    <div class='hbody' style='text-align:center;'>
+      <iframe style='display:inline-block;width: 50%;height:300px;' src='<?php echo $chosen_poem ?>'></iframe>
     </div>
     <div class='header'>
       <table>
@@ -166,6 +189,20 @@ HTML;
           <tr><td id='white'>Trap Hole</td><td><input type='submit' value='view' name='image4'></td></tr>
         </form>
       </table>
+    </div>
+
+    <div class='subheader'>
+      <h2>My Schedule</h2>
+    </div>
+    <div class='hbody'>
+      <form action='save_schedule.php'>
+        <table id='black'>
+          <tr id='black'><th id='black'>Weekday</th><th id='black'>Activity</th><th id='black'>Start</th><th id='black'>End</th><th>delete</th></tr>
+          <?php echo $schedule; ?>
+          <!-- add new-entry row -->
+        </table>
+        <input type='submit' value='Save Changes' name='submit_schedule' />
+      </form>
     </div>
   </body>
   <footer>
